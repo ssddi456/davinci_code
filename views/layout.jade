@@ -69,7 +69,6 @@ html
       }
 
       function call_api ( optn, done ){
-        optn.type = 'json';
         optn.success = function( data ){
           if( data.ru ){
             location.href= data.ru;
@@ -77,15 +76,28 @@ html
           }
 
           if( data.msg ){
-            toast(data.msg, data.err != 0);
+            toast(data.msg);
           }
 
           if( data.err == 0 ){
             done(null, data);
           }
         };
-        optn.failed = function( err ){
-          done(err);
+        optn.error = function( err ){
+          if( err.responseText ){
+            try{
+              var data = JSON.parse(err.responseText);
+            } catch(e){
+              done(err);
+              return;
+            }
+            if( data.msg ){
+              toast(data.msg, true);
+            }
+            done(data);
+          } else {
+            done(err);
+          }
         };
         $.ajax(optn);
       }

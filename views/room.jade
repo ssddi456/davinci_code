@@ -2,11 +2,6 @@ extends layout
 
 block content
   h1= title
-  .weui-cells
-    .weui-cell
-      .weui-cell__bd
-        a(href='/') HOME
-  
   #main(v-cloak)
     div(v-if='status == "perpare"')
       .weui-cells__title 玩家列表
@@ -33,7 +28,7 @@ block content
     div(v-if='status == "playing"')
       center
         h1
-          | {{ count_down }}
+          | {{ userId == current_player_id ? '我的回合' : '' }} {{ count_down }}
       .weui-panel.weui-panel_access(v-for="player in players", 
                                     v-if="player.id != userId", 
                                     :class="{ current_player : player.id == current_player_id, out : player.status == 'out' }")
@@ -45,11 +40,11 @@ block content
               .card(v-for="card in player.cards",
                     :class="{ black : card.back == 'black' }")
                 button(@click="guess( player.id, $index, card )")
-                  | {{ card.num || ' '}}
+                  span {{ card.num || ' '}}
                 .index {{ $index + 1 }}
         .weui-panel__ft
           .weui-cell.weui-cell_access(v-if="player.last_guess.display_name")
-            | 上次猜测 {{ player.last_guess.display_name }}的第{{ player.last_guess.pos + 1 }}张卡是{{player.last_guess.num}}
+            | 上次猜测 {{ player.last_guess.display_name }}的第{{ parseInt(player.last_guess.pos, 10) + 1 }}张卡是{{player.last_guess.num}}
 
       .weui-panel.weui-panel_access(:class="{ current_player : userId == current_player_id, out : me.status == 'out' }")
         .weui-panel__hd 
@@ -60,8 +55,11 @@ block content
               .card(v-for="card in my_cards",
                     :class="{ black : card.back == 'black', show : card.status == 'show' }")
                 button
-                  | {{ card.num }}
+                  span {{ card.num }}
                 .index {{ $index + 1 }}
+        .weui-panel__ft
+          .weui-cell.weui-cell_access(v-if="me.last_guess.display_name")
+            | 上次猜测 {{ me.last_guess.display_name }}的第{{ parseInt(me.last_guess.pos, 10) + 1 }}张卡是{{me.last_guess.num}}
 
   #grid
     .weui-mask
@@ -199,7 +197,7 @@ append scripts
     $grid.find('.close').click(close_grid);
     
   
-    var match_my_cards = funtion(){
+    var match_my_cards = function(){
       var my_cards = main_vm.my_cards;
       var me_cards = main_vm.me && main_vm.me.cards;
 
@@ -216,7 +214,7 @@ append scripts
       if( status == 'playing' ){
         call_api({
           method : 'POST',
-          url : '/room/game_card'
+          url : '/room/game_card?id=' + roomId
         }, function( err, data ){
           if( !err ){
             var cards = data.cards;

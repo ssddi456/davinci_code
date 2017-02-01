@@ -53,13 +53,16 @@ body{
 }
 
 .card button{
-  font-family: "黑体";
   float: left;
   min-width: 4em;
   min-height: 6em;
 }
+.card button > span{
+  font-size: 20px;
+  font-family: "黑体";
+}
 .card.show{
-
+  opacity: 0.5;
 }
 
 .card.black button{

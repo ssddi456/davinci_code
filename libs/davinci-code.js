@@ -18,8 +18,8 @@ wilddog.initializeApp({
 var noop = function() {};
 
 var davinciCodeCardPool  = {
-  chrs : _.range(0,12).concat('-'),
-  // chrs : _.range(0,4).concat('-'),
+  // chrs : _.range(0,12).concat('-'),
+  chrs : _.range(0,4).concat('-'),
   colors : ['white', 'black']
 };
 davinciCodeCardPool.allCards = [].concat.call.apply([].concat, davinciCodeCardPool.colors.map( x => davinciCodeCardPool.chrs.map( y => [x,y] ) ));
@@ -164,7 +164,7 @@ dcgp.start = function( user_id, done ) {
       }
 
       var player_len = keys.length;
-      if( player_len < 3 ){
+      if( player_len < 2 ){
         return done(new Error('至少需要三个玩家'));
       }
 
@@ -220,6 +220,7 @@ dcgp.start = function( user_id, done ) {
         updater_player[ k + '/cards' ] = cards.ondesk[idx].map( x => x.toJSON() );
         updater_player[ k + '/status' ] = 'playing';
         updater_player[ k + '/success_status' ] = 'alive';
+        updater_player[ k + '/last_guess' ] = null;
         self.players[k] = cards.ondesk[idx];
       });
 
@@ -280,7 +281,7 @@ dcgp.guess = function( user_id, guess, done ) {
 
   self.count_down = self.count_down_from;
 
-  self.ref.child('players/' + guess.target + '/last_guess').set(guess);
+  self.ref.child('players/' + user_id + '/last_guess').set(guess);
 
   if( card.num == guess.num ){
     card.status = 'show';
@@ -299,7 +300,13 @@ dcgp.guess = function( user_id, guess, done ) {
 }
 
 dcgp.get_cards = function( user_id ) {
-  return this.players[guess.target];
+  return this.players[user_id].map(function( card ) {
+      return {
+        num : card.num,
+        back: card.back,
+        status: card.status
+      };
+  });
 };
 
 dcgp.get_card = function( guess ) {
