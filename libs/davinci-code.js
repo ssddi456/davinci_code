@@ -197,7 +197,7 @@ dcgp.start = function( user_id, done ) {
               }
             } 
 
-            debug('next_player', player_idx, current_player_id);
+            debug('next_player', player_idx, current_player_id, player.success_status);
 
             self.current_player_id = current_player_id;
 

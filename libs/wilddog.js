@@ -67,7 +67,7 @@ var wilddog = function() {
 var wp = wilddog.prototype;
 
 wp.get_url = function() {
-  debug('get_url enter');
+  // debug('get_url enter');
   if( !this.sync ){
     throw new Error('wilddog havnt init');
   }
@@ -75,13 +75,13 @@ wp.get_url = function() {
 }
 
 wp.get_doc_path = function() {
-  debug('get_doc_path enter');
+  // debug('get_doc_path enter');
   if( !this.r_root )  {
     throw new Error('mongo havnt init');
   }
 
   var doc_path = this.path.slice(this.r_root.length+1).replace(/\//g, '.');
-  debug( this.path, this.r_root, doc_path);
+  // debug( this.path, this.r_root, doc_path);
   return doc_path;
 };
 

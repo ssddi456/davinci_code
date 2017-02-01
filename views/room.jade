@@ -2,7 +2,7 @@ extends layout
 
 block content
 
-  h1= title
+  h2 达芬奇密码
 
   if need_join
 
@@ -13,10 +13,10 @@ block content
       a#join_room.weui-btn.weui-btn_primary(href='#') 加入房间
   
   else 
-    #main(v-cloak)
+    #main
       div(v-if='status == "perpare"')
         .weui-cells__title 玩家列表
-        .weui-cells
+        .weui-cells(v-cloak)
           .weui-cell(v-for="player in players")
             .weui-cell__bd
               p 
@@ -37,14 +37,14 @@ block content
               a.weui-btn.weui-btn_warn(href="#",@click="exit") 退出房间
 
       div(v-if='status == "playing"')
-        center
+        center(v-cloak)
           h1
             | {{ userId == current_player_id ? '我的回合' : '' }} {{ count_down }}
         .weui-panel.weui-panel_access(v-for="player in players", 
                                       v-if="player.id != userId", 
-                                      :class="{ current_player : player.id == current_player_id, out : player.status == 'out' }")
+                                      :class="{ current_player : player.id == current_player_id, out : player.success_status == 'out' }")
           .weui-panel__hd 
-            | {{ get_game_name(player) }} 顺位 {{ player.order + 1 }} {{ player.status == 'out' ? '已被击杀' : ''}}
+            | {{ get_game_name(player) }} 顺位 {{ player.order + 1 }} {{ player.success_status == 'out' ? '已被击杀' : ''}}
           .weui-panel__bd
             .weui-media-box.weui-media-box_appmsg
               .cards
@@ -57,9 +57,9 @@ block content
             .weui-cell.weui-cell_access(v-if="player.last_guess.display_name")
               | 上次猜测 {{ get_game_name(player.last_guess) }}的第{{ parseInt(player.last_guess.pos, 10) + 1 }}张卡是{{player.last_guess.num}}
 
-        .weui-panel.weui-panel_access(:class="{ current_player : userId == current_player_id, out : me.status == 'out' }")
+        .weui-panel.weui-panel_access(:class="{ current_player : userId == current_player_id, out : me.success_status == 'out' }")
           .weui-panel__hd 
-            h3 我 : {{ get_game_name(me) }} | 顺位{{ me.order +1 }} {{ userId == current_player_id ? '我的回合' : '' }} {{ me.status == 'out' ? '已被击杀' : ''}}
+            h3 我 : {{ get_game_name(me) }} | 顺位{{ me.order +1 }} {{ userId == current_player_id ? '我的回合' : '' }} {{ me.success_status == 'out' ? '已被击杀' : ''}}
           .weui-panel__bd
             .weui-media-box.weui-media-box_appmsg
               .cards
