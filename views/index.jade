@@ -1,0 +1,53 @@
+extends layout
+
+block content
+  
+  h2 你好
+  h3= session.pear_name.name
+  
+  #main(v-cloak)
+    .weui-cells__title 房间列表
+    .weui-cells
+      .weui-cell(v-for="room in rooms")
+        .weui-cell__bd
+          a(:href="'/room?id=' + room.id")
+            | 房间 {{$index + 1}}
+
+  .weui-btn-area
+    a#create_room.weui-btn.weui-btn_primary(href='#') 创建房间
+
+
+append scripts
+  script.
+
+    var main_vm = new Vue({
+      el : '#main',
+      data : {
+        rooms : []
+      }
+    });
+    
+    call_api({
+      method : 'GET',
+      url : '/rooms'
+    }, function( err, data ){
+
+      data.rooms.forEach(function( room ){
+        main_vm.rooms.push(room);
+      });
+
+    });
+
+
+    $('#create_room').click(function(){
+      call_api({
+        method : 'POST',
+        url : '/create'
+      }, function( err ){
+        if( err ){
+          consol.log(err);
+        }
+      })
+      toast('创建房间');
+    });
+    

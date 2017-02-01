@@ -1,0 +1,97 @@
+include ./mixins.jade
+
+doctype html
+html
+  head
+    meta(name="viewport",content="width=device-width,initial-scale=1,user-scalable=0")
+    title= title
+
+    link(rel='stylesheet', href='/stylesheets/weui.css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    block css
+  body
+    .container
+      block content
+    
+
+      #toast(style='display: none;')
+        .weui-mask_transparent
+        .weui-toast
+          i.weui-icon_toast
+          p.weui-toast__content
+
+
+    script(src="http://cdn.bootcss.com/jquery/1.12.3/jquery.min.js")
+    script(src="http:////cdn.bootcss.com/vue/1.0.28/vue.min.js")
+    script(type="text/javascript",src="https://cdn.wilddog.com/sdk/js/2.4.3/wilddog.js")
+    script.
+      var wilddog_config = {
+        authDomain: "trpgs.wilddog.com",
+        syncURL: "https://trpgs.wilddogio.com",
+      };
+      var doge = wilddog.initializeApp(wilddog_config);
+      var wildToken = '#{wilddogToken}';
+
+      //- if( wildToken ){
+      //-   wilddog.auth().signInWithCustomToken(wildToken)
+      //-     .then(function(){
+
+      //-       console.log(wilddog.auth().currentUser);
+
+      //-     })
+      //-     .catch(function(error){
+      //-       var errorCode = error.code;
+      //-       var errorMessage = error.message;
+      //-       console.log(errorCode, errorMessage);
+      //-     });
+      //- }
+
+
+      var $toast = $('#toast');
+      var $toast_content = $toast.find('p.weui-toast__content');
+      var $toast_icon = $toast.find('.weui-icon_toast');
+      function toast ( msg, failed ){
+        $toast_content.text(msg);
+        if( $toast.css('display') != 'none'){
+          return;
+        }
+
+        if( failed ){
+          $toast_icon.removeClass('weui-icon-success-no-circle').addClass('weui-icon-warn');
+        } else {
+          $toast_icon.removeClass('weui-icon-warn').addClass('weui-icon-success-no-circle');
+        }
+
+        $toast.fadeIn(100);
+        setTimeout(function () {
+          $toast.fadeOut(100);
+        }, 2e3);
+      }
+
+      function call_api ( optn, done ){
+        optn.type = 'json';
+        optn.success = function( data ){
+          if( data.ru ){
+            location.href= data.ru;
+            return;
+          }
+
+          if( data.msg ){
+            toast(data.msg, data.err != 0);
+          }
+
+          if( data.err == 0 ){
+            done(null, data);
+          }
+        };
+        optn.failed = function( err ){
+          done(err);
+        };
+        $.ajax(optn);
+      }
+
+      function get_template ( id ){
+        return $('script[type="text/template"]#'+id).html();
+      }
+
+    block scripts

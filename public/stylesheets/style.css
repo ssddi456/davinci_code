@@ -1,0 +1,80 @@
+[v-cloak] {
+  display: none;
+}
+body{
+  background-color: #f8f8f8;
+}
+.container{
+  padding : 0 15px;
+}
+
+#grid .num{
+  width: 25%;
+}
+
+#grid .num p{
+  font-size: 20px;
+  font-family: "黑体";
+}
+
+#grid .num.active{
+  background-color: green;
+}
+
+#grid .num.active p{
+  color: white;
+}
+
+#grid{
+  display: none;
+}
+
+.cards{
+  clear: both;
+}
+
+.card{
+  min-width: 4em;
+  min-height: 6em;
+  position: relative;
+  display: inline-block;
+}
+
+.card .index {
+  position: absolute;
+  top: -0.5em;
+  left: -0.5em;
+  background-color: black;
+  color: white;
+  width: 1.5em;
+  height: 1.5em;
+  border-radius: 1em;
+  text-align: center;
+}
+
+.card button{
+  font-family: "黑体";
+  float: left;
+  min-width: 4em;
+  min-height: 6em;
+}
+.card.show{
+
+}
+
+.card.black button{
+  color: white;
+  background-color: black;
+}
+
+.current_player {
+  background-color: #f1eb65;;
+}
+.current_player .weui-panel__hd{
+  color: black;
+}
+
+.out {
+  background-color:#909090; 
+  color: #d0d0d0;
+}

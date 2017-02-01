@@ -1,0 +1,25 @@
+{
+  "version": "0.0.1", 
+  "description": "trpg game", 
+  "private": true, 
+  "dependencies": {
+    "connect-mongodb-session": "~1.3.0", 
+    "morgan": "~1.7.0", 
+    "cookie-parser": "~1.4.3", 
+    "mongodb": "~2.1.18", 
+    "jade": "~1.11.0", 
+    "express": "~4.13.4", 
+    "request": "~2.72.0", 
+    "body-parser": "~1.15.1", 
+    "express-session": "~1.15.0", 
+    "underscore": "~1.8.3", 
+    "debug": "~2.2.0", 
+    "async": "~0.9.0", 
+    "serve-favicon": "~2.3.0", 
+    "jws": "~3.1.4"
+  }, 
+  "scripts": {
+    "start": "node ./bin/www"
+  }, 
+  "name": "davinci_code"
+}
