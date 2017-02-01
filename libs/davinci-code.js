@@ -18,8 +18,10 @@ wilddog.initializeApp({
 var noop = function() {};
 
 var davinciCodeCardPool  = {
-  // chrs : _.range(0,12).concat('-'),
-  chrs : _.range(0,4).concat('-'),
+  chrs : _.range(0,12).concat('-'),
+  biggest : 12,
+  // biggest : 4,
+  // chrs : _.range(0,4).concat('-'),
   colors : ['white', 'black']
 };
 davinciCodeCardPool.allCards = [].concat.call.apply([].concat, davinciCodeCardPool.colors.map( x => davinciCodeCardPool.chrs.map( y => [x,y] ) ));
@@ -38,36 +40,26 @@ davinciCodeCardPool.generateGame = function( num ) {
 
   allCards.slice(allCards.length % num).map(function( type, idx ) {
     var card = new davinciCodeCard( type[0], type[1] );
+    if( type[1] == '-' ){
+      card.sort_by = Math.random() * davinciCodeCardPool.biggest;
+    } else {
+      card.sort_by = parseInt(type[1]);
+    }
     ret.ondesk[idx%num].push(card);
   });
 
   _.range(0, num).forEach(( x )=>{
     ret.ondesk[x].sort(function( a, b ) {
-      if( a.num == '-' || b.num == '-' ){
-        return 0;
-      }
-
-      var num_a = parseInt(a.num);
-      var num_b = parseInt(b.num);
-      if( num_a > num_b ){
-        return 1;
-      } else if( num_a == num_b ){
-        if( a.back == 'black' ){
-          return -1;
-        } else {
-          return 1;
-        }
-      } else {
-        return -1;
-      }
+      return a.sort_by - b.sort_by;
     });
   });
+
   return ret;
 }
 
 function davinciCodeCard ( back, num ) {
   this.back = back;
-  this.num = num;
+  this.num = (num + '').trim();
   /**
    * hide or show
    */
@@ -164,7 +156,7 @@ dcgp.start = function( user_id, done ) {
       }
 
       var player_len = keys.length;
-      if( player_len < 2 ){
+      if( player_len < 3 ){
         return done(new Error('至少需要三个玩家'));
       }
 

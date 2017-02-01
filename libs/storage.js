@@ -8,7 +8,7 @@ if( debug_name == 'index'){
 })()
 var debug = require('debug')(debug_name);
 
-var nedb = require('nedb');
+
 var path = require('path');
 var mongoclient = require('mongodb').MongoClient;
 var events = require('events');
