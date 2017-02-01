@@ -33,7 +33,7 @@ block content
                                     v-if="player.id != userId", 
                                     :class="{ current_player : player.id == current_player_id, out : player.status == 'out' }")
         .weui-panel__hd 
-          | {{ player.display_name }} 顺位{{ player.order + 1}} {{ player.status == 'out' ? '已被击杀' : ''}}
+          | {{ get_game_name(player) }} 顺位 {{ player.order + 1 }} {{ player.status == 'out' ? '已被击杀' : ''}}
         .weui-panel__bd
           .weui-media-box.weui-media-box_appmsg
             .cards
@@ -44,11 +44,11 @@ block content
                 .index {{ $index + 1 }}
         .weui-panel__ft
           .weui-cell.weui-cell_access(v-if="player.last_guess.display_name")
-            | 上次猜测 {{ player.last_guess.display_name }}的第{{ parseInt(player.last_guess.pos, 10) + 1 }}张卡是{{player.last_guess.num}}
+            | 上次猜测 {{ get_game_name(player.last_guess) }}的第{{ parseInt(player.last_guess.pos, 10) + 1 }}张卡是{{player.last_guess.num}}
 
       .weui-panel.weui-panel_access(:class="{ current_player : userId == current_player_id, out : me.status == 'out' }")
         .weui-panel__hd 
-          h3 我 顺位{{ me.order +1 }} {{ userId == current_player_id ? '我的回合' : '' }} {{ me.status == 'out' ? '已被击杀' : ''}}
+          h3 我 : {{ get_game_name(me) }} | 顺位{{ me.order +1 }} {{ userId == current_player_id ? '我的回合' : '' }} {{ me.status == 'out' ? '已被击杀' : ''}}
         .weui-panel__bd
           .weui-media-box.weui-media-box_appmsg
             .cards
@@ -59,7 +59,7 @@ block content
                 .index {{ $index + 1 }}
         .weui-panel__ft
           .weui-cell.weui-cell_access(v-if="me.last_guess.display_name")
-            | 上次猜测 {{ me.last_guess.display_name }}的第{{ parseInt(me.last_guess.pos, 10) + 1 }}张卡是{{me.last_guess.num}}
+            | 上次猜测 {{ get_game_name(me.last_guess) }}的第{{ parseInt(me.last_guess.pos, 10) + 1 }}张卡是{{me.last_guess.num}}
 
   #grid
     .weui-mask
@@ -111,6 +111,8 @@ append scripts
 
     var local_player_map = {};
 
+    var names = '甲乙丙丁戊己庚辛';
+
     var main_vm =new Vue({
       el : '#main',
       data : {
@@ -126,6 +128,13 @@ append scripts
 
       },
       methods : {
+        get_game_name: function( player ){
+          if( player.order ){
+            return names[player.order];
+          } else if( player.target ){
+            return names[ main_vm.players[local_player_map[player.target]].order];
+          }
+        },
         invite : function(){
           toast('分享本页面以邀请玩家加入');
         },
@@ -264,7 +273,7 @@ append scripts
       main_vm.players.splice(local_player_map[ key ], 1, val);
   
       if( key == userId ){
-        main_vm.me = val;
+        main_vm.$set('me', val);
         match_my_cards();
       }
 

@@ -50,7 +50,16 @@ davinciCodeCardPool.generateGame = function( num ) {
 
   _.range(0, num).forEach(( x )=>{
     ret.ondesk[x].sort(function( a, b ) {
-      return a.sort_by - b.sort_by;
+      var delta =  a.sort_by - b.sort_by;
+      if( delta == 0 ){
+        if( a.back == 'black' ){
+          return -1;
+        } else {
+          return 1;
+        }
+      } else {
+        return delta;
+      }
     });
   });
 
@@ -156,8 +165,8 @@ dcgp.start = function( user_id, done ) {
       }
 
       var player_len = keys.length;
-      if( player_len < 3 ){
-        return done(new Error('至少需要三个玩家'));
+      if( player_len < 2 ){
+        return done(new Error('至少需要两个玩家'));
       }
 
       if( player_len > 6 ){
@@ -274,8 +283,8 @@ dcgp.guess = function( user_id, guess, done ) {
   self.count_down = self.count_down_from;
 
   self.ref.child('players/' + user_id + '/last_guess').set(guess);
-
-  if( card.num == guess.num ){
+  debug('check', 'card.num', card.num, 'guess.num', guess.num);
+  if( (card.num + '').trim() == ( guess.num + '').trim() ){
     card.status = 'show';
     self.ref.child('players/' + guess.target + '/cards/' + guess.pos ).update({
       status : 'show',
@@ -283,9 +292,11 @@ dcgp.guess = function( user_id, guess, done ) {
     }, function() {
         
     });
+    debug('猜对了')
     done(null, '猜对了');
     self.check_game_status();
   } else {
+    debug('猜错了')
     done(new Error('猜错了') );
     self.next_player();
   }
@@ -382,15 +393,21 @@ dcgp.add_player = function( user_id, user_name, done ) {
   var data_path = 'players/'+user_id;
   done = done || noop;
 
-  self.ref.child(data_path).get(function( err, player ) {
-    if( player){
-      done(null, player);
+  self.ref.child('players').get(function( err, players ) {
+    if( err ){
+      done(err);
+    } else if( players && players[user_id] ){
+      done(null, players[user_id]);
     } else {
-      var new_player = new davinciCodePlayer(user_id);
-      new_player.display_name = user_name;
-      self.ref.child(data_path).set(new_player,function(err, res) {
-          done();
-      });
+      if( players && Object.keys(players).length > 6 ){
+        done(new Error('玩家数目已达上限'));
+      } else {
+        var new_player = new davinciCodePlayer(user_id);
+        new_player.display_name = user_name;
+        self.ref.child(data_path).set(new_player,function(err, res) {
+            done();
+        });
+      }
     }
   })
 
