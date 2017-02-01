@@ -394,6 +394,7 @@ dcgp.add_player = function( user_id, user_name, done ) {
   done = done || noop;
 
   self.ref.child('players').get(function( err, players ) {
+    debug('add_player check step');
     if( err ){
       done(err);
     } else if( players && players[user_id] ){
@@ -404,7 +405,9 @@ dcgp.add_player = function( user_id, user_name, done ) {
       } else {
         var new_player = new davinciCodePlayer(user_id);
         new_player.display_name = user_name;
+        debug('add_player add new player');
         self.ref.child(data_path).set(new_player,function(err, res) {
+          debug('add_player add new player finish');
             done();
         });
       }
@@ -446,7 +449,6 @@ dcgp.toJSON = function() {
   return {
     id : this.id,
     admin : this.admin,
-    players : this.players,
     status : this.status,
     rest_cards : this.rest_cards
   };

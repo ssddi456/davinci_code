@@ -1,102 +1,113 @@
 extends layout
 
 block content
+
   h1= title
-  #main(v-cloak)
-    div(v-if='status == "perpare"')
-      .weui-cells__title 玩家列表
-      .weui-cells
-        .weui-cell(v-for="player in players")
-          .weui-cell__bd
-            p 
-              | {{ player.display_name }}
-              i(v-if="player.id == userId", style="font-size:12px;")
-                | &nbsp;我
 
-          .weui-cell__ft
-            span(v-if="player.id == admin")
-              | 房主
-      .weui-btn-area
-        .weui-flex
-          .weui-flex__item(v-if='userId == admin')
-            a.weui-btn.weui-btn_primary(href='#',@click="start") 开始游戏
-          .weui-flex__item
-            a.weui-btn.weui-btn_default(href="#",@click="invite") 邀请玩家
-          .weui-flex__item
-            a.weui-btn.weui-btn_warn(href="#",@click="exit") 退出房间
+  if need_join
 
-    div(v-if='status == "playing"')
-      center
-        h1
-          | {{ userId == current_player_id ? '我的回合' : '' }} {{ count_down }}
-      .weui-panel.weui-panel_access(v-for="player in players", 
-                                    v-if="player.id != userId", 
-                                    :class="{ current_player : player.id == current_player_id, out : player.status == 'out' }")
-        .weui-panel__hd 
-          | {{ get_game_name(player) }} 顺位 {{ player.order + 1 }} {{ player.status == 'out' ? '已被击杀' : ''}}
-        .weui-panel__bd
-          .weui-media-box.weui-media-box_appmsg
-            .cards
-              .card(v-for="card in player.cards",
-                    :class="{ black : card.back == 'black' }")
-                button(@click="guess( player.id, $index, card )")
-                  span {{ card.num || ' '}}
-                .index {{ $index + 1 }}
-        .weui-panel__ft
-          .weui-cell.weui-cell_access(v-if="player.last_guess.display_name")
-            | 上次猜测 {{ get_game_name(player.last_guess) }}的第{{ parseInt(player.last_guess.pos, 10) + 1 }}张卡是{{player.last_guess.num}}
+    h2 你好
+    h3= session.pear_name.name
 
-      .weui-panel.weui-panel_access(:class="{ current_player : userId == current_player_id, out : me.status == 'out' }")
-        .weui-panel__hd 
-          h3 我 : {{ get_game_name(me) }} | 顺位{{ me.order +1 }} {{ userId == current_player_id ? '我的回合' : '' }} {{ me.status == 'out' ? '已被击杀' : ''}}
-        .weui-panel__bd
-          .weui-media-box.weui-media-box_appmsg
-            .cards
-              .card(v-for="card in my_cards",
-                    :class="{ black : card.back == 'black', show : card.status == 'show' }")
-                button
-                  span {{ card.num }}
-                .index {{ $index + 1 }}
-        .weui-panel__ft
-          .weui-cell.weui-cell_access(v-if="me.last_guess.display_name")
-            | 上次猜测 {{ get_game_name(me.last_guess) }}的第{{ parseInt(me.last_guess.pos, 10) + 1 }}张卡是{{me.last_guess.num}}
+    .weui-btn-area
+      a#join_room.weui-btn.weui-btn_primary(href='#') 加入房间
+  
+  else 
+    #main(v-cloak)
+      div(v-if='status == "perpare"')
+        .weui-cells__title 玩家列表
+        .weui-cells
+          .weui-cell(v-for="player in players")
+            .weui-cell__bd
+              p 
+                | {{ player.display_name }}
+                i(v-if="player.id == userId", style="font-size:12px;")
+                  | &nbsp;我
 
-  #grid
-    .weui-mask
-    .weui-dialog
-      .weui-dialog__hd
-        strong.weui-dialog__title 我猜是...
-      .weui-dialog__bd
-        .weui-grids
-          a.num.weui-grid(href='javascript:;')
-            p.weui-grid__label 0
-          a.num.weui-grid(href='javascript:;')
-            p.weui-grid__label 1
-          a.num.weui-grid(href='javascript:;')
-            p.weui-grid__label 2
-          a.num.weui-grid(href='javascript:;')
-            p.weui-grid__label 3
-          a.num.weui-grid(href='javascript:;')
-            p.weui-grid__label 4
-          a.num.weui-grid(href='javascript:;')
-            p.weui-grid__label 5
-          a.num.weui-grid(href='javascript:;')
-            p.weui-grid__label 6
-          a.num.weui-grid(href='javascript:;')
-            p.weui-grid__label 7
-          a.num.weui-grid(href='javascript:;')
-            p.weui-grid__label 8
-          a.num.weui-grid(href='javascript:;')
-            p.weui-grid__label 9
-          a.num.weui-grid(href='javascript:;')
-            p.weui-grid__label 10
-          a.num.weui-grid(href='javascript:;')
-            p.weui-grid__label 11
-          a.num.weui-grid.last(href='javascript:;')
-            p.weui-grid__label -
-      .weui-dialog__ft
-        .close.weui-dialog__btn.weui-dialog__btn_default(href='javascript:;') 取消
-        .confirm.weui-dialog__btn.weui-dialog__btn_default(href='javascript:;') 确认
+            .weui-cell__ft
+              span(v-if="player.id == admin")
+                | 房主
+        .weui-btn-area
+          .weui-flex
+            .weui-flex__item(v-if='userId == admin')
+              a.weui-btn.weui-btn_primary(href='#',@click="start") 开始游戏
+            .weui-flex__item
+              a.weui-btn.weui-btn_default(href="#",@click="invite") 邀请玩家
+            .weui-flex__item
+              a.weui-btn.weui-btn_warn(href="#",@click="exit") 退出房间
+
+      div(v-if='status == "playing"')
+        center
+          h1
+            | {{ userId == current_player_id ? '我的回合' : '' }} {{ count_down }}
+        .weui-panel.weui-panel_access(v-for="player in players", 
+                                      v-if="player.id != userId", 
+                                      :class="{ current_player : player.id == current_player_id, out : player.status == 'out' }")
+          .weui-panel__hd 
+            | {{ get_game_name(player) }} 顺位 {{ player.order + 1 }} {{ player.status == 'out' ? '已被击杀' : ''}}
+          .weui-panel__bd
+            .weui-media-box.weui-media-box_appmsg
+              .cards
+                .card(v-for="card in player.cards",
+                      :class="{ black : card.back == 'black' }")
+                  button(@click="guess( player.id, $index, card )")
+                    span {{ card.num || ' '}}
+                  .index {{ $index + 1 }}
+          .weui-panel__ft
+            .weui-cell.weui-cell_access(v-if="player.last_guess.display_name")
+              | 上次猜测 {{ get_game_name(player.last_guess) }}的第{{ parseInt(player.last_guess.pos, 10) + 1 }}张卡是{{player.last_guess.num}}
+
+        .weui-panel.weui-panel_access(:class="{ current_player : userId == current_player_id, out : me.status == 'out' }")
+          .weui-panel__hd 
+            h3 我 : {{ get_game_name(me) }} | 顺位{{ me.order +1 }} {{ userId == current_player_id ? '我的回合' : '' }} {{ me.status == 'out' ? '已被击杀' : ''}}
+          .weui-panel__bd
+            .weui-media-box.weui-media-box_appmsg
+              .cards
+                .card(v-for="card in my_cards",
+                      :class="{ black : card.back == 'black', show : card.status == 'show' }")
+                  button
+                    span {{ card.num }}
+                  .index {{ $index + 1 }}
+          .weui-panel__ft
+            .weui-cell.weui-cell_access(v-if="me.last_guess.display_name")
+              | 上次猜测 {{ get_game_name(me.last_guess) }}的第{{ parseInt(me.last_guess.pos, 10) + 1 }}张卡是{{me.last_guess.num}}
+
+    #grid
+      .weui-mask
+      .weui-dialog
+        .weui-dialog__hd
+          strong.weui-dialog__title 我猜是...
+        .weui-dialog__bd
+          .weui-grids
+            a.num.weui-grid(href='javascript:;')
+              p.weui-grid__label 0
+            a.num.weui-grid(href='javascript:;')
+              p.weui-grid__label 1
+            a.num.weui-grid(href='javascript:;')
+              p.weui-grid__label 2
+            a.num.weui-grid(href='javascript:;')
+              p.weui-grid__label 3
+            a.num.weui-grid(href='javascript:;')
+              p.weui-grid__label 4
+            a.num.weui-grid(href='javascript:;')
+              p.weui-grid__label 5
+            a.num.weui-grid(href='javascript:;')
+              p.weui-grid__label 6
+            a.num.weui-grid(href='javascript:;')
+              p.weui-grid__label 7
+            a.num.weui-grid(href='javascript:;')
+              p.weui-grid__label 8
+            a.num.weui-grid(href='javascript:;')
+              p.weui-grid__label 9
+            a.num.weui-grid(href='javascript:;')
+              p.weui-grid__label 10
+            a.num.weui-grid(href='javascript:;')
+              p.weui-grid__label 11
+            a.num.weui-grid.last(href='javascript:;')
+              p.weui-grid__label -
+        .weui-dialog__ft
+          .close.weui-dialog__btn.weui-dialog__btn_default(href='javascript:;') 取消
+          .confirm.weui-dialog__btn.weui-dialog__btn_default(href='javascript:;') 确认
 
 
 append scripts
@@ -104,185 +115,203 @@ append scripts
     var roomId = '#{room.id}';
     var userId = '#{user_id}';
     var myname = '#{session.pear_name.name}';
+    
+    var need_join = '#{need_join}';
 
-    var roomRef = doge.sync().child('rooms').child(roomId);
-    var playersRef = roomRef.child('players');
-    var selfRef = playersRef.child(userId);
+    if( need_join == 'true' ){
+      $('#join_room').click(function(){
+        call_api({
+          method : 'POST',
+          url : '/room/join?id='+roomId
+        }, function(){
 
-    var local_player_map = {};
+        });
+      });
+    } else {
+      init_room();
+    }
+  
+    function init_room (){
 
-    var names = '甲乙丙丁戊己庚辛';
+      var roomRef = doge.sync().child('rooms').child(roomId);
+      var playersRef = roomRef.child('players');
+      var selfRef = playersRef.child(userId);
 
-    var main_vm =new Vue({
-      el : '#main',
-      data : {
-        userId : userId,
-        admin  : '',
-        status : '',
-        count_down : 0,
-        current_player_id  : '',
-        players : [],
-        
-        me : '',
-        my_cards : [],
+      var local_player_map = {};
 
-      },
-      methods : {
-        get_game_name: function( player ){
-          if( player.order ){
-            return names[player.order];
-          } else if( player.target ){
-            return names[ main_vm.players[local_player_map[player.target]].order];
-          }
+      var names = '甲乙丙丁戊己庚辛';
+
+      var main_vm =new Vue({
+        el : '#main',
+        data : {
+          userId : userId,
+          admin  : '',
+          status : '',
+          count_down : 0,
+          current_player_id  : '',
+          players : [],
+          
+          me : '',
+          my_cards : [],
+
         },
-        invite : function(){
-          toast('分享本页面以邀请玩家加入');
-        },
-        exit : function(){
-          call_api({
-            method : 'POST',
-            url : '/room/exit?id=' + roomId
-          }, function(){
-
-          });
-        },
-        start : function(){
-          call_api({
-            method : 'POST',
-            url : '/room/start?id=' + roomId
-          }, function(){
-
-          });
-        },
-        guess : function(target, pos, card){
-          if( card.status == 'show' ){
-            return;
-          }
-          if( userId != main_vm.current_player_id ){
-            return;
-          }
-
-          var last_guess = {
-              target : target,
-              pos : pos,
-              display_name : main_vm.players[local_player_map[target]].display_name
-          };
-
-          show_grid(function( num ){
-            last_guess.num = num;
+        methods : {
+          get_game_name: function( player ){
+            if( player.order != undefined ){
+              return names[player.order];
+            } else if( player.target ){
+              return names[ main_vm.players[local_player_map[player.target]].order];
+            }
+          },
+          invite : function(){
+            toast('分享本页面以邀请玩家加入');
+          },
+          exit : function(){
             call_api({
               method : 'POST',
-              url : '/room/guess?id=' + roomId,
-              data : last_guess
+              url : '/room/exit?id=' + roomId
             }, function(){
 
             });
+          },
+          start : function(){
+            call_api({
+              method : 'POST',
+              url : '/room/start?id=' + roomId
+            }, function(){
 
+            });
+          },
+          guess : function(target, pos, card){
+            if( card.status == 'show' ){
+              return;
+            }
+            if( userId != main_vm.current_player_id ){
+              return;
+            }
+
+            var last_guess = {
+                target : target,
+                pos : pos,
+                display_name : main_vm.players[local_player_map[target]].display_name
+            };
+
+            show_grid(function( num ){
+              last_guess.num = num;
+              call_api({
+                method : 'POST',
+                url : '/room/guess?id=' + roomId,
+                data : last_guess
+              }, function(){
+
+              });
+
+            });
+          }
+        }
+      });
+      
+      var $grid = $('#grid');
+      var last_choose;
+      var show_grid = function( callback ){
+        $grid.show();
+        $grid.one('click.grid_choose', '.confirm', function( e ){
+          close_grid();
+          callback(last_choose);
+        });
+      };
+      var close_grid = function(){
+        $grid.off('click.grid_choose');
+        $grid.hide();
+      };
+      $grid.on('click', '.num', function( e ){
+        last_choose = e.target.innerText;
+        var $target = $(this);
+        
+        $target.addClass('active');
+        $target.siblings().removeClass('active');
+      });
+      $grid.find('.close').click(close_grid);
+      
+    
+      var match_my_cards = function(){
+        var my_cards = main_vm.my_cards;
+        var me_cards = main_vm.me && main_vm.me.cards;
+
+        if( my_cards && me_cards ){
+          my_cards.forEach(function( card, idx ){
+            card.status = me_cards[idx].status;
           });
         }
-      }
-    });
-    
-    var $grid = $('#grid');
-    var last_choose;
-    var show_grid = function( callback ){
-      $grid.show();
-      $grid.one('click.grid_choose', '.confirm', function( e ){
-        close_grid();
-        callback(last_choose);
+      };
+
+      roomRef.child('status').on('value', function( snapshot ){
+        var status = main_vm.status = snapshot.val();
+
+        if( status == 'playing' ){
+          call_api({
+            method : 'POST',
+            url : '/room/game_card?id=' + roomId
+          }, function( err, data ){
+            if( !err ){
+              var cards = data.cards;
+              main_vm.my_cards.splice.apply(main_vm.my_cards, [0, main_vm.my_cards.length].concat(data.cards));
+
+              match_my_cards();            
+            }
+          })
+        }
       });
-    };
-    var close_grid = function(){
-      $grid.off('click.grid_choose');
-      $grid.hide();
-    };
-    $grid.on('click', '.num', function( e ){
-      last_choose = e.target.innerText;
-      var $target = $(this);
-      
-      $target.addClass('active');
-      $target.siblings().removeClass('active');
-    });
-    $grid.find('.close').click(close_grid);
+
+      roomRef.child('admin').on('value', function( snapshot ){
+        main_vm.admin = snapshot.val();
+      });
     
-  
-    var match_my_cards = function(){
-      var my_cards = main_vm.my_cards;
-      var me_cards = main_vm.me && main_vm.me.cards;
+      roomRef.child('count_down').on('value', function( snapshot ){
+        var val = snapshot.val();
+        main_vm.count_down = val;
 
-      if( my_cards && me_cards ){
-        my_cards.forEach(function( card, idx ){
-          card.status = me_cards[idx].status;
-        });
-      }
-    };
+        if( val == 30 ){
+          close_grid();
+        }
+      });
+      roomRef.child('current_player_id').on('value', function( snapshot ){
+        main_vm.current_player_id = snapshot.val();
+      });
 
-    roomRef.child('status').on('value', function( snapshot ){
-      var status = main_vm.status = snapshot.val();
+      roomRef.child('result').on('value', function( snapshot ){
+        var val = snapshot.val();
 
-      if( status == 'playing' ){
-        call_api({
-          method : 'POST',
-          url : '/room/game_card?id=' + roomId
-        }, function( err, data ){
-          if( !err ){
-            var cards = data.cards;
-            main_vm.my_cards.splice.apply(main_vm.my_cards, [0, main_vm.my_cards.length].concat(data.cards));
+        if( val && val.display_name ){
+          toast('胜利者是' + val.display_name);
+        }
+      });
 
-            match_my_cards();            
-          }
-        })
-      }
-    });
+      playersRef.on("child_added", function( snapshot ){
+        var key = snapshot.key();
+        var val = snapshot.val();
 
-    roomRef.child('admin').on('value', function( snapshot ){
-      main_vm.admin = snapshot.val();
-    });
-  
-    roomRef.child('count_down').on('value', function( snapshot ){
-      var val = snapshot.val();
-      main_vm.count_down = val;
+        local_player_map[ key ] = main_vm.players.push(val) - 1;
+      });
 
-      if( val == 30 ){
-        close_grid();
-      }
-    });
-    roomRef.child('current_player_id').on('value', function( snapshot ){
-      main_vm.current_player_id = snapshot.val();
-    });
+      playersRef.on("child_changed", function( snapshot ){
+        var key = snapshot.key();
+        var val = snapshot.val();
+        console.log("child_changed", key, val);
+        main_vm.players.splice(local_player_map[ key ], 1, val);
+    
+        if( key == userId ){
+          main_vm.$set('me', val);
+          match_my_cards();
+        }
 
-    roomRef.child('result').on('value', function( snapshot ){
-      var val = snapshot.val();
+      });
 
-      if( val && val.display_name ){
-        toast('胜利者是' + val.display_name);
-      }
-    });
-
-    playersRef.on("child_added", function( snapshot ){
-      var key = snapshot.key();
-      var val = snapshot.val();
-
-      local_player_map[ key ] = main_vm.players.push(val) - 1;
-    });
-
-    playersRef.on("child_changed", function( snapshot ){
-      var key = snapshot.key();
-      var val = snapshot.val();
-      console.log("child_changed", key, val);
-      main_vm.players.splice(local_player_map[ key ], 1, val);
-  
-      if( key == userId ){
-        main_vm.$set('me', val);
-        match_my_cards();
-      }
-
-    });
-
-    playersRef.on("child_removed", function( snapshot ){
-      var key = snapshot.key();
-      var val = snapshot.val();
-      
-      main_vm.players.splice(local_player_map[ key ], 1);
-      delete local_player_map[ key ];
-    });
+      playersRef.on("child_removed", function( snapshot ){
+        var key = snapshot.key();
+        var val = snapshot.val();
+        
+        main_vm.players.splice(local_player_map[ key ], 1);
+        delete local_player_map[ key ];
+      });
+    }

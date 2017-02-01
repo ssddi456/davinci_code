@@ -1,3 +1,14 @@
+var path    = require('path');
+var debug_name = path.basename(__filename,'.js');
+if( debug_name == 'index'){
+  debug_name = path.basename(__dirname);
+}
+(require.main === module) && (function(){
+    process.env.DEBUG = '*';
+})()
+
+var debug = require('debug')(debug_name);
+
 var express = require('express');
 var davinciCode = require('../libs/davinci-code');
 var router = express.Router();
@@ -86,6 +97,8 @@ router.post('/create', function( req, resp, next ) {
   var body = req.body;
   
   var user_id = (req.user && req.user._id) || req.session.id;
+  var user_name = (req.user && req.user.name) || req.session.pear_name.name;
+
   var roomId = util.uuid();
 
   //
@@ -103,9 +116,18 @@ router.post('/create', function( req, resp, next ) {
           msg : '创建房间失败 ' + err.message + '\n' + err.stack
         }); 
       } else {
-        resp.json({ 
-          err: 0,
-          ru : '/room?id=' + roomId 
+        game.add_player(user_id, user_name, function( err, player ) {
+          if( err ){
+            return next(err);
+          }
+
+          debug('reload page');
+
+          resp.json({ 
+            err: 0,
+            ru : '/room?id=' + roomId
+          });
+
         });
       }
     });
@@ -152,16 +174,30 @@ router.get('/room', function( req, resp, next ) {
       resp.render('room', { room : req.game_room.toJSON() });
     } else {
       if( req.game_room.get_status() == 'playing' ){
-        next(new Error('游戏进行中，还不能加入房间'));
+
+        next(new Error('游戏进行中，不能加入此房间'));
+
       } else {
-        req.game_room.add_player( user_id, user_name, function( err ) {
-          if( err ){
-            next(err);
-          } else {
-            resp.render('room', { room : req.game_room.toJSON() });
-          }
-        })
+        resp.render('room', { room : req.game_room.toJSON(), need_join : true });
       }
+    }
+  });
+});
+
+router.post('/room/join', function( req, resp, next ) {
+  var query = req.query;
+
+  var user_id = (req.user && req.user._id) || req.session.id;
+  var user_name = (req.user && req.user.name) || req.session.pear_name.name;
+
+  req.game_room.add_player(user_id, user_name, function( err, player ) {
+    if( err ){
+      next(err);
+    } else {
+      resp.json({
+        err : 0,
+        ru : '/room?id=' + query.id
+      });
     }
   });
 });
