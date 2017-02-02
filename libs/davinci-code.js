@@ -12,7 +12,7 @@ var _ = require('underscore');
 var async = require('async');
 var wilddog = require('./wilddog');
 wilddog.initializeApp({
-  sync : 'https://trpgs.wilddogio.com'
+  sync : 'https://trpg-1b9ab.firebaseio.com'
 });
 
 var noop = function() {};
@@ -229,12 +229,14 @@ dcgp.start = function( user_id, done ) {
       self.status = 'playing';
       self.count_down = self.count_down_from;
       self.result = {};
+      self.rest_cards = cards.rest;
 
       var updater_game = {
         'current_player_id' : keys[player_idx],
         status : 'playing',
         count_down : self.count_down_from,
-        result : {}
+        result : {},
+        rest_cards : cards.rest
       };
 
       async.parallel([
@@ -322,6 +324,7 @@ dcgp.check_game_status = function( done ) {
   done = done || noop;
   var self = this;
   this.ref.child('players').get(function( err, players ) {
+    debug('check_game_status get players', err);
     if( players ){
 
       var updater = {};
@@ -338,6 +341,7 @@ dcgp.check_game_status = function( done ) {
                 return card.status == 'show';
               })
           ){
+            debug('check_game_status players', k, 'is out');
             updater['players/' + k + '/success_status'] = 'out';
           } else {
             winner = player;
@@ -354,11 +358,10 @@ dcgp.check_game_status = function( done ) {
           display_name : winner.display_name
         };
 
-        self.ref.update(updater, done);
         clearTimeout(self.timer);
-      } else {
-        done();
       }
+
+      self.ref.update(updater, done);
     }
   })
   

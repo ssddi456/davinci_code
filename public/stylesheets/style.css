@@ -36,8 +36,12 @@ body{
 .card{
   min-width: 4em;
   min-height: 6em;
+  padding-right: 1em;
   position: relative;
   display: inline-block;
+}
+.card:last-child{
+  padding-right: 0;
 }
 
 .card .index {
@@ -52,20 +56,23 @@ body{
   text-align: center;
 }
 
-.card button{
-  float: left;
+.card .button{
+  display: inline-block;
+  border: 1px solid #000;
   min-width: 4em;
   min-height: 6em;
+  text-align: center;
 }
-.card button > span{
-  font-size: 20px;
+.card .button > span{
+  line-height: 2em;
+  font-size: 3em;
   font-family: "黑体";
 }
 .card.show{
   opacity: 0.5;
 }
 
-.card.black button{
+.card.black .button{
   color: white;
   background-color: black;
 }
@@ -77,7 +84,18 @@ body{
   color: black;
 }
 
-.out {
+.player .weui-panel__hd{
+  color: black;
+}
+
+.player.out {
   background-color:#909090; 
-  color: #d0d0d0;
+  color: black;
+}
+.player.out .weui-panel__hd{
+  font-size: 20px;
+}
+
+.player.out .weui-panel__bd{
+  opacity: 0.5;
 }

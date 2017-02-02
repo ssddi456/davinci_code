@@ -21,6 +21,17 @@ var storage = require('../libs/storage');
 var user_store = storage('trpg', 'users');
 var room_store = storage('trpg', 'rooms');
 
+
+
+// var firebaseAdmin = require('firebase-admin');
+// var serviceAccount = require(path.join(__dirname,'../trpg-ea00ef2ba6c1.json'));
+
+// firebaseAdmin.initializeApp({
+//   credential: firebaseAdmin.credential.cert(serviceAccount),
+//   databaseURL: "https://trpg-1b9ab.firebaseio.com"
+// });
+
+
 var _ = require('underscore');
 
 var random_avatar = require('../libs/random_avatar');
@@ -38,20 +49,30 @@ router.use(function( req, resp, next ) {
     resp.locals.session = req.session;
   }
 
+  if( req.session.is_login && req.user ){
+  } else {
+  }
+
   if( req.session.is_login 
     && req.session.user_id 
   ){
     user_store.findOne({ _id : mongodb.objectId(req.session.user_id) }, function( err, doc ) {
       if( doc ){
+        // resp.locals.wilddogToken = wilddogTokenInstance.createToken({ uid : req.user._id });
+        // resp.locals.wilddogToken = firebaseAdmin.auth().createCustomToken( req.user._id );
         req.user = doc;
         resp.locals.user = doc;
         resp.locals.user_id = doc._id || req.session.id;
       } else {
         resp.locals.user_id = req.session.id;
+        // resp.locals.wilddogToken = wilddogTokenInstance.createToken({ uid : req.user._id });
+        // resp.locals.wilddogToken = firebaseAdmin.auth().createCustomToken( req.user._id );
       }
       next();
     });
   } else {
+    // resp.locals.wilddogToken = wilddogTokenInstance.createToken({ uid : req.session.id });
+    // resp.locals.wilddogToken = firebaseAdmin.auth().createCustomToken( req.session.id );
     resp.locals.user_id = req.session.id;
     next();
   }
@@ -62,16 +83,9 @@ router.use(function( req, resp, next ) {
 /* GET home page. */
 router.get('/', function(req, res, next) {
 
-  var wilddogTokenInstance = new wilddogTokenGenerator(config.wilddogSuperToken);
   var render_params = {
     title: 'Express'
   };
-
-  if( req.session.is_login && req.user ){
-    render_params.wilddogToken = wilddogTokenInstance.createToken({ uid : req.user._id, display_name : req.session.pear_name });
-  } else {
-    render_params.wilddogToken = wilddogTokenInstance.createToken({ uid : req.session.id, display_name : req.session.pear_name });
-  }
 
   res.render('index', render_params);
 

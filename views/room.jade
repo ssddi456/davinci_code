@@ -15,6 +15,11 @@ block content
   else 
     #main
       div(v-if='status == "perpare"')
+        div(v-if='result',v-cloak)
+        .weui-cells__title 上一局的胜利者是
+        .weui-cells
+          h1 {{ result.display_name }}
+
         .weui-cells__title 玩家列表
         .weui-cells(v-cloak)
           .weui-cell(v-for="player in players")
@@ -40,7 +45,7 @@ block content
         center(v-cloak)
           h1
             | {{ userId == current_player_id ? '我的回合' : '' }} {{ count_down }}
-        .weui-panel.weui-panel_access(v-for="player in players", 
+        .player.weui-panel.weui-panel_access(v-for="player in players", 
                                       v-if="player.id != userId", 
                                       :class="{ current_player : player.id == current_player_id, out : player.success_status == 'out' }")
           .weui-panel__hd 
@@ -50,14 +55,15 @@ block content
               .cards
                 .card(v-for="card in player.cards",
                       :class="{ black : card.back == 'black' }")
-                  button(@click="guess( player.id, $index, card )")
-                    span {{ card.num || ' '}}
+                  .button(@click="guess( player.id, $index, card )")
+                    span {{ card.num || "<" }}
                   .index {{ $index + 1 }}
           .weui-panel__ft
             .weui-cell.weui-cell_access(v-if="player.last_guess.display_name")
               | 上次猜测 {{ get_game_name(player.last_guess) }}的第{{ parseInt(player.last_guess.pos, 10) + 1 }}张卡是{{player.last_guess.num}}
 
-        .weui-panel.weui-panel_access(:class="{ current_player : userId == current_player_id, out : me.success_status == 'out' }")
+        //- 当前玩家
+        .player.weui-panel.weui-panel_access(:class="{ current_player : userId == current_player_id, out : me.success_status == 'out' }")
           .weui-panel__hd 
             h3 我 : {{ get_game_name(me) }} | 顺位{{ me.order +1 }} {{ userId == current_player_id ? '我的回合' : '' }} {{ me.success_status == 'out' ? '已被击杀' : ''}}
           .weui-panel__bd
@@ -65,7 +71,7 @@ block content
               .cards
                 .card(v-for="card in my_cards",
                       :class="{ black : card.back == 'black', show : card.status == 'show' }")
-                  button
+                  .button
                     span {{ card.num }}
                   .index {{ $index + 1 }}
           .weui-panel__ft
@@ -153,6 +159,9 @@ append scripts
           
           me : '',
           my_cards : [],
+
+          rest_cards : {},
+          result : {},
 
         },
         methods : {
@@ -279,8 +288,16 @@ append scripts
         main_vm.current_player_id = snapshot.val();
       });
 
+      roomRef.child('rest_cards').on('value', function( snapshot ){
+
+        main_vm.$set('rest_cards', snapshot.val());
+
+      });
+
       roomRef.child('result').on('value', function( snapshot ){
         var val = snapshot.val();
+
+        main_vm.$set('result', snapshot.val());
 
         if( val && val.display_name ){
           toast('胜利者是' + val.display_name);
@@ -288,16 +305,22 @@ append scripts
       });
 
       playersRef.on("child_added", function( snapshot ){
-        var key = snapshot.key();
+        var key = snapshot.key;
         var val = snapshot.val();
 
         local_player_map[ key ] = main_vm.players.push(val) - 1;
+
+        if( key == userId ){
+          main_vm.$set('me', val);
+          match_my_cards();
+        }
+
       });
 
       playersRef.on("child_changed", function( snapshot ){
-        var key = snapshot.key();
+        var key = snapshot.key;
         var val = snapshot.val();
-        console.log("child_changed", key, val);
+
         main_vm.players.splice(local_player_map[ key ], 1, val);
     
         if( key == userId ){
@@ -308,7 +331,7 @@ append scripts
       });
 
       playersRef.on("child_removed", function( snapshot ){
-        var key = snapshot.key();
+        var key = snapshot.key;
         var val = snapshot.val();
         
         main_vm.players.splice(local_player_map[ key ], 1);

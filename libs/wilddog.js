@@ -44,6 +44,7 @@ var wilddog = function() {
         method : method,
         json : data
       }, function( err, resp, body ) {
+        debug( err, url, body );
         if( body ){
           if( typeof body == 'string' ){
             try{
@@ -71,7 +72,11 @@ wp.get_url = function() {
   if( !this.sync ){
     throw new Error('wilddog havnt init');
   }
-  return this.sync + this.path + '.json';
+  var base_url = this.sync + this.path + '.json';
+  if( this.auth ){
+    base_url += '?auth=' + this.auth;
+  }
+  return base_url;
 }
 
 wp.get_doc_path = function() {
@@ -110,9 +115,27 @@ wp.init = function( data, done ) {
 
 };
 
+
+// try make firebaseAdmin to use https proxy
 wp.initializeApp = function( optn ) {
   debug('initializeApp enter');
-  this.sync = optn.sync;
+  this.sync = optn.sync || optn.databaseURL;
+  
+  if( optn.serviceAccount ){
+    // auth will not success
+    return;
+
+    var firebaseAdmin = require('firebase-admin');
+    var serviceAccount = require(optn.serviceAccount);
+
+    firebaseAdmin.initializeApp({
+      credential: firebaseAdmin.credential.cert(serviceAccount),
+      databaseURL: this.sync
+    });
+
+    this.auth = firebaseAdmin.auth().createCustomToken('trpg_davinci_server_id_ea00ef2ba');
+
+  }
 };
 
 wp.parse_path = function( path ) {
