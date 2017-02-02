@@ -73,9 +73,7 @@ wp.get_url = function() {
     throw new Error('wilddog havnt init');
   }
   var base_url = this.sync + this.path + '.json';
-  if( this.auth ){
-    base_url += '?auth=' + this.auth;
-  }
+
   return base_url;
 }
 
@@ -117,14 +115,15 @@ wp.init = function( data, done ) {
 
 
 // try make firebaseAdmin to use https proxy
-wp.initializeApp = function( optn ) {
+wp.initializeApp = function( optn, done ) {
   debug('initializeApp enter');
   this.sync = optn.sync || optn.databaseURL;
-  
-  if( optn.serviceAccount ){
-    // auth will not success
-    return;
+  done = done || noop;
+  var self = this;
 
+  if( optn.serviceAccount ){
+    // auth will not success so we will see a warning
+    debug('wilddog cannot get oauth');
     var firebaseAdmin = require('firebase-admin');
     var serviceAccount = require(optn.serviceAccount);
 
@@ -132,9 +131,8 @@ wp.initializeApp = function( optn ) {
       credential: firebaseAdmin.credential.cert(serviceAccount),
       databaseURL: this.sync
     });
-
-    this.auth = firebaseAdmin.auth().createCustomToken('trpg_davinci_server_id_ea00ef2ba');
-
+  } else {
+    done();
   }
 };
 
@@ -168,6 +166,7 @@ wp.child = function( _path ) {
   var self = this;
   var root = this.root();
 
+  
   child.r_root = this.r_root;
   child.root_doc_id = this.root_doc_id;
 
